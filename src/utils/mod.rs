@@ -44,6 +44,38 @@ impl Polynomial {
 
         Polynomial { coefficients }
     }
+    /// Creates a new polynomial specifically designed for Shamir's Secret Sharing (SSS).
+    /// In SSS, the secret is embedded as the constant term (the 0th coefficient) of the polynomial,
+    /// and the remaining coefficients are generated randomly. This method ensures that the polynomial
+    /// is initialized accordingly, with the provided secret as the constant term and random coefficients
+    /// for the other terms, up to the specified threshold.
+    ///
+    /// # Arguments
+    ///
+    /// * `threshold`: The threshold number of shares needed to reconstruct the secret. This also
+    /// determines the degree of the polynomial, which will be `threshold - 1`.
+    /// * `secret_bits`: The number of bits of the secret. This is used to determine the range of
+    /// random coefficients generated for the polynomial's terms, ensuring they are of a similar
+    /// magnitude to the secret.
+    /// * `secret`: A reference to the `BigUint` representing the secret to be shared. This value
+    /// will be used as the constant term of the polynomial.
+    ///
+    /// # Returns
+    ///
+    /// A `Polynomial` instance with the specified secret embedded as the constant term, and random
+    /// coefficients for the other terms, making it suitable for use in Shamir's Secret Sharing.
+    ///
+    pub fn new_for_shamir(threshold: usize, secret_bits: usize, secret: &BigUint) -> Self {
+        let mut rng = thread_rng();
+        let mut coefficients = vec![secret.clone()];
+
+        for _ in 1..threshold {
+            let coef = rng.gen_biguint_range(&BigUint::one(), &(BigUint::one() << secret_bits));
+            coefficients.push(coef);
+        }
+
+        Polynomial { coefficients }
+    }
     /// Evaluates the polynomial at a given point `x`.
     ///
     /// # Arguments
@@ -239,6 +271,15 @@ mod tests {
         let expected = "1 + 2x + 3x^2".to_string();
         assert_eq!(poly.to_string(), expected);
     }
+    #[test]
+    fn test_evaluation(){
+        let poly = Polynomial {
+            coefficients: vec![90782.to_biguint().unwrap(), 222234.to_biguint().unwrap(), 123343.to_biguint().unwrap()],
+        };   
+        let x=poly.evaluate(&(1.to_biguint().unwrap()));   
+        let y = poly.coefficients.iter().fold(BigUint::zero(), |acc, coeff| acc + coeff); 
+        assert_eq!(y,x); 
+    }
 
     // Test for prime generation
     #[test]
@@ -278,12 +319,12 @@ mod tests {
     #[test]
     fn test_lagrange_interpolation_zero() {
         let points = vec![
-            (1.to_biguint().unwrap(), 4.to_biguint().unwrap()),
-            (2.to_biguint().unwrap(), 7.to_biguint().unwrap()),
-            (3.to_biguint().unwrap(), 2.to_biguint().unwrap())
+            (1.to_biguint().unwrap(), 90.to_biguint().unwrap()),
+            (2.to_biguint().unwrap(), 87.to_biguint().unwrap()),
+            (3.to_biguint().unwrap(), 678.to_biguint().unwrap())
         ];
-        let modulus = 11.to_biguint().unwrap();
+        let modulus = 1009.to_biguint().unwrap();
         let secret = lagrange_interpolation_zero(&points, &modulus).unwrap();
-        assert_eq!(secret, 4.to_biguint().unwrap());
+        assert_eq!(secret, 687.to_biguint().unwrap());
     }
 }
