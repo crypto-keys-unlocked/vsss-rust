@@ -1,0 +1,94 @@
+use crate::shamirs_secret_sharing::{generate_shares, reconstruct_secret};
+use crate::utils::{Polynomial, mod_exp, generate_prime};
+use num_bigint::{BigUint, RandBigInt};
+use num_traits::{Zero, One};
+use rand::{thread_rng, Rng};
+use std::collections::HashSet;
+
+pub struct BenalohVerifiability {
+    pub t: usize, // Threshold
+    pub n: usize, // Total number of shares
+    pub q: BigUint, // Prime modulus for the field operations
+    pub k: usize, // Number of random polynomials
+}
+
+impl BenalohVerifiability {
+    /// Initializes a new instance of the Benaloh Verifiability.
+    pub fn new(t: usize, n: usize, k: usize, q: BigUint) -> Self {
+        Self { t, n, k, q }
+    }
+
+    /// Step 1: Dealer chooses polynomial P and distributes shares.
+    pub fn distribute_shares(&self, secret: &BigUint) -> Vec<(BigUint, BigUint)> {
+        generate_shares(secret, self.t, self.n, &self.q)
+    }
+
+    /// Step 2: Dealer constructs k random polynomials of degree t and distributes shares.
+    fn generate_random_polynomials(&self) -> Vec<Polynomial> {
+        (0..self.k).map(|_| {
+            Polynomial::new(self.t - 1, self.q.bits() as usize)
+        }).collect()
+    }
+
+    /// Interactive Proof steps to verify the integrity of the dealer.
+    ///
+    /// Note: This is a conceptual representation. Actual implementation details might
+    /// vary based on requirements and the utility functions' interfaces.
+    pub fn perform_interactive_proof(&self, secret: &BigUint) {
+        // Simplified steps for interactive proof
+
+        // Step 1 & 2: Generate and distribute shares from both the actual secret polynomial
+        // and the k random polynomials.
+        let shares_from_secret = self.distribute_shares(secret);
+        let random_polynomials = self.generate_random_polynomials();
+
+        // Step 3: Share-holders choose a random subset of m < k polynomials.
+        // This would involve communication or a predefined random choice mechanism.
+        let chosen_polys = self.choose_random_subset(self.k / 2); // Example subset choice
+
+        // Step 4 & 5: Dealer reveals chosen polynomials and demonstrates the consistency
+        // without revealing the secret.
+        // In a real implementation, this step would involve more complex logic
+        // to ensure the integrity and authenticity of the dealer.
+    }
+
+    /// Simulates share-holders choosing a random subset of m < k polynomials.
+    fn choose_random_subset(&self, m: usize) -> HashSet<usize> {
+        let mut rng = thread_rng();
+        let mut chosen = HashSet::new();
+        while chosen.len() < m {
+            let i = rng.gen_range(0..self.k);
+            chosen.insert(i);
+        }
+        chosen
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::utils::{lagrange_interpolation_zero, generate_prime};
+
+    #[test]
+    fn test_benaloh_verifiability_scheme() {
+        let t = 3;
+        let n = 5;
+        let k = 10;
+        let q = generate_prime(256);
+        let secret = BigUint::from(1234u32);
+
+        let benaloh = BenalohVerifiability::new(t, n, k, q);
+
+        // Distribute shares for the actual secret
+        let shares = benaloh.distribute_shares(&secret);
+
+        // Perform the interactive proof steps (conceptually)
+        benaloh.perform_interactive_proof(&secret);
+
+        // Verification of shares would go here. In a real-world scenario, this would
+        // involve each share-holder verifying their share's integrity based on the dealer's proof.
+
+        // Assert some conditions as placeholders for actual verification logic
+        assert!(!shares.is_empty(), "Shares should not be empty");
+    }
+}

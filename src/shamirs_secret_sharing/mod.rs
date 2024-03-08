@@ -1,3 +1,27 @@
+//! # Shamir's Secret Sharing (SSS) Module
+//!
+//! This module implements Shamir's Secret Sharing, a cryptographic algorithm to distribute
+//! a secret amongst a group of participants, each of whom is allocated a share of the secret.
+//! The unique property of SSS is that the secret can only be reconstructed when a sufficient
+//! number of shares (threshold) are combined together; individually, shares do not reveal
+//! any information about the secret.
+//!
+//! The scheme is based on polynomial interpolation over a finite field, ensuring security
+//! and mathematical robustness. It has applications in secure key storage, distributed systems,
+//! and wherever secret management is critical.
+//!
+//! ## Key Functionalities
+//! - **Share Generation**: Divides a secret into multiple shares, ensuring that only a
+//!   specified number of shares can reconstruct the secret.
+//! - **Secret Reconstruction**: Combines a sufficient number of shares to reconstruct
+//!   the original secret using Lagrange interpolation.
+//!
+//! ## Usage
+//! This module is designed to be used where secure and distributed control over a secret
+//! is necessary. It leverages the `Polynomial` and `lagrange_interpolation_zero` functions
+//! from the `utils` module for its core operations, aligning with cryptographic best practices.
+//!
+
 use num_bigint::{BigUint, ToBigUint};
 use crate::utils::Polynomial;
 use crate::utils::lagrange_interpolation_zero;
