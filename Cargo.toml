@@ -1,9 +1,15 @@
 [package]
 name = "vsss-rust"
 version = "0.1.0"
+authors = ["Debrup debrupc3@gmail.com"]
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+license = "MIT"
+description = "A Rust library providing implementations of Verifiable Secret Sharing (VSS) schemes."
+homepage = "https://github.com/crypto-keys-unlocked/vsss-rust"
+repository = "https://github.com/crypto-keys-unlocked/vsss-rust"
+documentation = "https://docs.rs/vsss-rust"
+readme = "README.md"
+keywords = ["rust", "cryptography", "secret-sharing", "security"]
 
 [dependencies]
 num-bigint = { version = "0.4", features = ["rand"] }
@@ -11,3 +17,10 @@ num-prime = "0.4.3"
 sha2 = "0.9"
 rand = "0.8"
 num-traits = "0.2"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "benchmark"
+harness = false
